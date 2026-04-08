@@ -2,6 +2,7 @@
   "name": "ai-job-portal",
   "version": "1.0.0",
   "scripts": {
-    "start": "node backend/server.js & npm run dev --prefix frontend"
+    "start": "if [ \"$NODE_ENV\" = \"production\" ] || [ -n \"$RENDER\" ]; then node backend/server.js; else node backend/server.js & npm run dev --prefix frontend; fi",
+    "dev": "node backend/server.js & npm run dev --prefix frontend"
   }
 }
