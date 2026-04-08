@@ -6,7 +6,7 @@ import {
 } from 'recharts';
 import { RefreshCw, Loader2 } from 'lucide-react';
 
-const API_BASE = 'http://localhost:5001/api';
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 
 function getAuthHeaders() {
   const userStr = localStorage.getItem('ai_jobs_user');
@@ -53,8 +53,8 @@ export default function Analytics() {
     setError(null);
     try {
       const [analyticsRes, jobsRes] = await Promise.all([
-        fetch(`${API_BASE}/recruiter/analytics?period=${period.replace('d', '')}`, { headers: getAuthHeaders() }),
-        fetch(`${API_BASE}/recruiter/jobs?status=active`, { headers: getAuthHeaders() })
+        fetch(`${API_BASE}/api/recruiter/analytics?period=${period.replace('d', '')}`, { headers: getAuthHeaders() }),
+        fetch(`${API_BASE}/api/recruiter/jobs?status=active`, { headers: getAuthHeaders() })
       ]);
 
       const analyticsJson = await analyticsRes.json();

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, ChevronUp, CheckCircle, XCircle, Star, Briefcase, AlertTriangle, RefreshCw, Loader2 } from 'lucide-react';
 
-const API_BASE = 'http://localhost:5001/api';
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 
 function getAuthHeaders() {
   const userStr = localStorage.getItem('ai_jobs_user');
@@ -60,8 +60,8 @@ export default function Applicants() {
     try {
       // Fetch both jobs (for the filter) and applications
       const [jobsRes, appsRes] = await Promise.all([
-        fetch(`${API_BASE}/recruiter/jobs?limit=50`, { headers: getAuthHeaders() }),
-        fetch(`${API_BASE}/recruiter/applications?limit=100`, { headers: getAuthHeaders() })
+        fetch(`${API_BASE}/api/recruiter/jobs?limit=50`, { headers: getAuthHeaders() }),
+        fetch(`${API_BASE}/api/recruiter/applications?limit=100`, { headers: getAuthHeaders() })
       ]);
 
       const jobsData = await jobsRes.json();
@@ -82,7 +82,7 @@ export default function Applicants() {
 
   const updateStatus = async (id, status) => {
     try {
-      const res = await fetch(`${API_BASE}/recruiter/applications/${id}/status`, {
+      const res = await fetch(`${API_BASE}/api/recruiter/applications/${id}/status`, {
         method: 'PUT',
         headers: getAuthHeaders(),
         body: JSON.stringify({ status })

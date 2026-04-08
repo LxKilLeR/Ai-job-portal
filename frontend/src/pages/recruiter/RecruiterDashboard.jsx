@@ -5,7 +5,7 @@ import {
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid
 } from 'recharts';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 
 function getAuthHeaders() {
   const userStr = localStorage.getItem('ai_jobs_user');
@@ -67,9 +67,9 @@ export default function RecruiterDashboard() {
       setLoading(true);
       setError(null);
       const [overviewRes, analyticsRes, jobsRes] = await Promise.all([
-        fetch(`${API_BASE}/recruiter/overview`, { headers: getAuthHeaders() }),
-        fetch(`${API_BASE}/recruiter/analytics?period=30d`, { headers: getAuthHeaders() }),
-        fetch(`${API_BASE}/recruiter/jobs?status=active&limit=3`, { headers: getAuthHeaders() })
+        fetch(`${API_BASE}/api/recruiter/overview`, { headers: getAuthHeaders() }),
+        fetch(`${API_BASE}/api/recruiter/analytics?period=30d`, { headers: getAuthHeaders() }),
+        fetch(`${API_BASE}/api/recruiter/jobs?status=active&limit=3`, { headers: getAuthHeaders() })
       ]);
 
       const overviewData = await overviewRes.json();

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Edit2, Trash2, Pause, Play, MapPin, DollarSign, Users, ChevronDown, ChevronUp, X, RefreshCw } from 'lucide-react';
 
-const API_BASE = 'http://localhost:5001/api';
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 
 function getAuthHeaders() {
   const userStr = localStorage.getItem('ai_jobs_user');
@@ -44,7 +44,7 @@ export default function ManageJobs() {
       const headers = getAuthHeaders();
       console.log('🔍 Request headers:', headers);
 
-      const res = await fetch(`${API_BASE}/recruiter/jobs?limit=100`, { headers });
+      const res = await fetch(`${API_BASE}/api/recruiter/jobs?limit=100`, { headers });
       console.log('🔍 Jobs API response status:', res.status, res.statusText);
 
       const data = await res.json();
@@ -79,7 +79,7 @@ export default function ManageJobs() {
 
   const toggleStatus = async (id) => {
     try {
-      const res = await fetch(`${API_BASE}/recruiter/jobs/${id}/toggle`, {
+      const res = await fetch(`${API_BASE}/api/recruiter/jobs/${id}/toggle`, {
         method: 'PATCH',
         headers: getAuthHeaders()
       });
@@ -96,7 +96,7 @@ export default function ManageJobs() {
 
   const deleteJob = async (id) => {
     try {
-      const res = await fetch(`${API_BASE}/recruiter/jobs/${id}`, {
+      const res = await fetch(`${API_BASE}/api/recruiter/jobs/${id}`, {
         method: 'DELETE',
         headers: getAuthHeaders()
       });
@@ -112,7 +112,7 @@ export default function ManageJobs() {
 
   const saveEdit = async () => {
     try {
-      const res = await fetch(`${API_BASE}/recruiter/jobs/${editJob._id}`, {
+      const res = await fetch(`${API_BASE}/api/recruiter/jobs/${editJob._id}`, {
         method: 'PUT',
         headers: getAuthHeaders(),
         body: JSON.stringify({

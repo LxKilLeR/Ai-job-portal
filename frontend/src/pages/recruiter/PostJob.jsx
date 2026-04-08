@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Plus, X, Loader2, CheckCircle2, Briefcase } from 'lucide-react';
 
-const API_BASE = 'http://localhost:5001/api';
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 const SKILL_SUGGESTIONS = ['React', 'TypeScript', 'Node.js', 'Python', 'AWS', 'Docker', 'Figma', 'SQL', 'GraphQL', 'Go', 'Kubernetes', 'MongoDB'];
 
 export default function PostJob() {
@@ -61,7 +61,7 @@ export default function PostJob() {
         ? `${form.salaryMin} - ${form.salaryMax}`
         : form.salaryMin || form.salaryMax || '';
 
-      const response = await fetch(`${API_BASE}/recruiter/jobs`, {
+      const response = await fetch(`${API_BASE}/api/recruiter/jobs`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
