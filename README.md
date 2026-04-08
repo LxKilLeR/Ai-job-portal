@@ -21,6 +21,24 @@ This repository defines both a `/backend` Express REST API and a `/frontend` Vit
    ```
 4. Access the web interface at `http://localhost:3000`.
 
+## Netlify Deployment
+
+This project deploys as a Vite frontend on Netlify with the backend hosted separately.
+
+1. Connect the repository to Netlify.
+2. Use the root [netlify.toml](netlify.toml) config.
+3. Netlify will build the frontend from `frontend/` and publish `frontend/dist`.
+4. Set these Netlify environment variables:
+   - `BACKEND_URL` = your live backend URL, for example `https://your-backend-domain.com`
+   - `VITE_GOOGLE_CLIENT_ID` = your Google OAuth client ID
+   - `VITE_API_URL` = optional; leave empty unless you want the browser to call the backend directly
+5. Set the backend environment variables:
+   - `FRONTEND_URL` = your Netlify site URL, for example `https://your-site.netlify.app`
+   - `MONGO_URI`, `JWT_SECRET`, `GEMINI_API_KEY`, `GOOGLE_CLIENT_ID`
+6. Deploy the backend first, then redeploy Netlify so `/api/*` requests proxy through the Netlify function.
+
+The frontend uses a Netlify function at [frontend/netlify/functions/api-proxy.js](frontend/netlify/functions/api-proxy.js) to forward `/api/*` requests to the backend.
+
 ## ⚙️ Stitch MCP Configuration
 
 The AI Career Assistant floating widget natively supports the Anthropic API alongside Stitch MCP configuration payloads.

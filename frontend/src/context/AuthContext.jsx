@@ -4,9 +4,6 @@ const AuthContext = createContext();
 const API_BASE = import.meta.env.VITE_API_URL || '';
 
 const requireApiBase = () => {
-  if (!API_BASE) {
-    console.warn('VITE_API_URL is not configured. Falling back to a relative /api path.');
-  }
   return API_BASE;
 };
 
