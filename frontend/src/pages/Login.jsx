@@ -5,6 +5,8 @@ import { useAuth } from '../context/AuthContext';
 import { Mail, Lock, LogIn, ArrowRight, ShieldCheck, Zap } from 'lucide-react';
 import { motion as Motion } from 'framer-motion';
 
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
+
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -126,18 +128,24 @@ export default function Login() {
           </div>
         </div>
 
-        <div className="flex justify-center mb-2">
-          <GoogleLogin
-            onSuccess={handleGoogleSuccess}
-            onError={handleGoogleError}
-            theme="filled_blue"
-            size="large"
-            text="signin_with"
-            shape="rectangular"
-            useOneTap
-            width="280"
-          />
-        </div>
+        {GOOGLE_CLIENT_ID ? (
+          <div className="flex justify-center mb-2">
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={handleGoogleError}
+              theme="filled_blue"
+              size="large"
+              text="signin_with"
+              shape="rectangular"
+              useOneTap
+              width="280"
+            />
+          </div>
+        ) : (
+          <div className="mb-2 rounded-xl border border-amber-400/20 bg-amber-400/10 px-4 py-3 text-center text-xs font-semibold text-amber-200">
+            Google sign-in is not configured for this deployment.
+          </div>
+        )}
 
         <div className="mt-6 pt-8 border-t border-white/5 flex flex-col items-center gap-6">
           <p className="text-center text-gray-400 text-sm font-medium">
