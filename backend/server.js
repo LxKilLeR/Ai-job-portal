@@ -15,13 +15,23 @@ const notificationRoutes = require('./routes/notifications');
 const app = express();
 const PORT = process.env.PORT || 5001;
 const isProduction = process.env.NODE_ENV === 'production';
-const allowedOrigins = (process.env.FRONTEND_URL || '')
+const configuredOrigins = (process.env.FRONTEND_URL || '')
   .split(',')
   .map((origin) => origin.trim())
   .filter(Boolean);
+const defaultProductionOrigins = ['https://aijob-portal.netlify.app'];
+const allowedOrigins = Array.from(new Set([
+  ...configuredOrigins,
+  ...(isProduction ? defaultProductionOrigins : ['http://localhost:3000'])
+]));
 
 app.use(cors({
-  origin: allowedOrigins.length > 0 ? allowedOrigins : (isProduction ? false : 'http://localhost:3000')
+  origin: (origin, callback) => {
+    // Allow server-to-server and tools without Origin header.
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    return callback(new Error(`CORS blocked for origin: ${origin}`));
+  }
 }));
 app.use(express.json());
 
