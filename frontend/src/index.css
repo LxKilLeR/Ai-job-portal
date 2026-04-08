@@ -1,0 +1,82 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Syne:wght@500;600;700;800&display=swap');
+
+@import "tailwindcss";
+
+@theme {
+  --color-navy: #070B18;
+  --color-indigo-primary: #4F6EF7;
+  --color-amber-accent: #F59E0B;
+  --font-syne: "Syne", sans-serif;
+  --font-outfit: "Outfit", sans-serif;
+}
+
+@layer base {
+  body {
+    @apply bg-navy text-gray-100 font-outfit antialiased selection:bg-indigo-primary selection:text-white;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-syne tracking-tight;
+  }
+}
+
+@layer components {
+  .glass-panel {
+    @apply bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl;
+  }
+
+  .glass-card {
+    @apply bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6 transition-all hover:bg-white/10;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center rounded-xl font-medium transition-all active:scale-95 duration-200 px-6 py-3 gap-2;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center rounded-xl font-medium transition-all active:scale-95 duration-200 px-6 py-3 gap-2 bg-indigo-primary text-white hover:bg-indigo-600 hover:shadow-[0_0_20px_rgba(79,110,247,0.4)];
+  }
+
+  .btn-accent {
+    @apply inline-flex items-center justify-center rounded-xl font-medium transition-all active:scale-95 duration-200 px-6 py-3 gap-2 bg-amber-accent text-navy hover:bg-amber-400 hover:shadow-[0_0_20px_rgba(245,158,11,0.4)];
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center rounded-xl font-medium transition-all active:scale-95 duration-200 px-6 py-3 gap-2 bg-transparent hover:bg-white/10 text-gray-300 hover:text-white border border-transparent hover:border-white/10;
+  }
+
+  .input-field {
+    @apply bg-navy/50 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-indigo-primary focus:ring-1 focus:ring-indigo-primary transition-colors w-full;
+  }
+
+  .label-text {
+    @apply block text-sm font-medium text-gray-300 mb-2;
+  }
+}
+
+/* Background mesh gradients */
+.bg-mesh {
+  background-color: #070b18;
+  background-image: 
+    radial-gradient(at 0% 0%, hsla(232, 92%, 64%, 0.15) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, hsla(24, 94%, 55%, 0.1) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, hsla(232, 92%, 64%, 0.1) 0px, transparent 50%),
+    radial-gradient(at 0% 100%, hsla(24, 94%, 55%, 0.15) 0px, transparent 50%);
+  background-attachment: fixed;
+  min-height: 100vh;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #070B18; 
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.1); 
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255,255,255,0.2); 
+}
