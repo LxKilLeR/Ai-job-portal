@@ -5,7 +5,7 @@ const API_BASE = import.meta.env.VITE_API_URL || '';
 
 const requireApiBase = () => {
   if (!API_BASE) {
-    throw new Error('VITE_API_URL is not configured. Set it to your deployed backend URL in Netlify environment variables.');
+    console.warn('VITE_API_URL is not configured. Falling back to a relative /api path.');
   }
   return API_BASE;
 };
