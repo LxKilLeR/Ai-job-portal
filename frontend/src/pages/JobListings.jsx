@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { Search, MapPin, DollarSign, Filter, Sparkles, Clock, Globe } from 'lucide-react';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+const API_BASE = import.meta.env.VITE_API_URL || '';
 
 export default function JobListings() {
   const [jobs, setJobs] = useState([]);

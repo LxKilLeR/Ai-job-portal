@@ -1,7 +1,14 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const AuthContext = createContext();
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+const API_BASE = import.meta.env.VITE_API_URL || '';
+
+const requireApiBase = () => {
+  if (!API_BASE) {
+    throw new Error('VITE_API_URL is not configured. Set it to your deployed backend URL in Netlify environment variables.');
+  }
+  return API_BASE;
+};
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -23,7 +30,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const res = await fetch(`${API_BASE}/api/auth/login`, {
+      const res = await fetch(`${requireApiBase()}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -60,7 +67,7 @@ export const AuthProvider = ({ children }) => {
 
   const loginWithGoogle = async (googleToken, role) => {
     try {
-      const res = await fetch(`${API_BASE}/api/auth/google`, {
+      const res = await fetch(`${requireApiBase()}/api/auth/google`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token: googleToken, role }),

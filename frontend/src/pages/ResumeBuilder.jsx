@@ -4,7 +4,7 @@ import html2pdf from 'html2pdf.js';
 import { Download, LayoutTemplate, FileEdit, Sparkles, Wand2, Eye, Split, Trash2, Plus, FileText } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+const API_BASE = import.meta.env.VITE_API_URL || '';
 
 export default function ResumeBuilder() {
   const { user } = useAuth();

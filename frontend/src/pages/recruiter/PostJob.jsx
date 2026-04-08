@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Plus, X, Loader2, CheckCircle2, Briefcase } from 'lucide-react';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+const API_BASE = import.meta.env.VITE_API_URL || '';
 const SKILL_SUGGESTIONS = ['React', 'TypeScript', 'Node.js', 'Python', 'AWS', 'Docker', 'Figma', 'SQL', 'GraphQL', 'Go', 'Kubernetes', 'MongoDB'];
 
 export default function PostJob() {

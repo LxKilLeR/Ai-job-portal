@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Edit2, Trash2, Pause, Play, MapPin, DollarSign, Users, ChevronDown, ChevronUp, X, RefreshCw } from 'lucide-react';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+const API_BASE = import.meta.env.VITE_API_URL || '';
 
 function getAuthHeaders() {
   const userStr = localStorage.getItem('ai_jobs_user');

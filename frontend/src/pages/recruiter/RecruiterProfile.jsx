@@ -4,7 +4,7 @@ import { User, Mail, Shield, MapPin, Briefcase, Camera, Edit3, Settings, LogOut,
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+const API_BASE = import.meta.env.VITE_API_URL || '';
 
 const getStoredToken = () => {
   try {

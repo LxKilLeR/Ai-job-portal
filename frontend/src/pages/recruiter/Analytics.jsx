@@ -6,7 +6,7 @@ import {
 } from 'recharts';
 import { RefreshCw, Loader2 } from 'lucide-react';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+const API_BASE = import.meta.env.VITE_API_URL || '';
 
 function getAuthHeaders() {
   const userStr = localStorage.getItem('ai_jobs_user');
