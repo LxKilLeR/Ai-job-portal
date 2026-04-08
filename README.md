@@ -39,6 +39,25 @@ This project deploys as a Vite frontend on Netlify with the backend hosted separ
 
 The frontend uses a Netlify function at [netlify/functions/api-proxy.js](netlify/functions/api-proxy.js) to forward `/api/*` requests to the backend.
 
+## Render Backend Deployment
+
+Use Render for the backend API service only. The frontend should stay on Netlify.
+
+1. Create a new Render Web Service from the repository root.
+2. Let Render read [render.yaml](render.yaml) or set these values manually:
+   - Root directory: `backend`
+   - Build command: `npm install`
+   - Start command: `npm start`
+3. Add the backend environment variables in Render:
+   - `MONGO_URI`
+   - `JWT_SECRET`
+   - `GEMINI_API_KEY`
+   - `GOOGLE_CLIENT_ID`
+   - `FRONTEND_URL` = your Netlify site URL
+   - `NODE_ENV=production`
+   - `PORT=5001`
+4. After the backend deploys, set `BACKEND_URL` in Netlify to the Render service URL.
+
 ## ⚙️ Stitch MCP Configuration
 
 The AI Career Assistant floating widget natively supports the Anthropic API alongside Stitch MCP configuration payloads.
