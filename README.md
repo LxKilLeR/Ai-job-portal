@@ -37,7 +37,7 @@ This project deploys as a Vite frontend on Netlify with the backend hosted separ
    - `MONGO_URI`, `JWT_SECRET`, `GEMINI_API_KEY`, `GOOGLE_CLIENT_ID`
 6. Deploy the backend first, then redeploy Netlify so `/api/*` requests proxy through the Netlify function.
 
-The frontend uses a Netlify function at [frontend/netlify/functions/api-proxy.js](frontend/netlify/functions/api-proxy.js) to forward `/api/*` requests to the backend.
+The frontend uses a Netlify function at [netlify/functions/api-proxy.js](netlify/functions/api-proxy.js) to forward `/api/*` requests to the backend.
 
 ## ⚙️ Stitch MCP Configuration
 
