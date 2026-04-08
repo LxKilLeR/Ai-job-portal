@@ -29,7 +29,7 @@ This project deploys as a Vite frontend on Netlify with the backend hosted separ
 2. Use the root [netlify.toml](netlify.toml) config.
 3. Netlify will build the frontend from `frontend/` and publish `frontend/dist`.
 4. Set these Netlify environment variables:
-   - `BACKEND_URL` = your live backend URL, for example `https://your-backend-domain.com`
+   - `BACKEND_URL` = `https://ai-job-portal-98k6.onrender.com`
    - `VITE_GOOGLE_CLIENT_ID` = your Google OAuth client ID
    - `VITE_API_URL` = optional; leave empty unless you want the browser to call the backend directly
 5. Set the backend environment variables:
@@ -56,7 +56,7 @@ Use Render for the backend API service only. The frontend should stay on Netlify
    - `FRONTEND_URL` = your Netlify site URL
    - `NODE_ENV=production`
    - `PORT=5001`
-4. After the backend deploys, set `BACKEND_URL` in Netlify to the Render service URL.
+4. After the backend deploys, set `BACKEND_URL` in Netlify to `https://ai-job-portal-98k6.onrender.com`.
 
 ## ⚙️ Stitch MCP Configuration
 
