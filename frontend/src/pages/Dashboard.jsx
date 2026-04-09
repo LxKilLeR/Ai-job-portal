@@ -23,6 +23,8 @@ export default function Dashboard() {
     profileViews: 0,
     matchScore: 0
   });
+  const [topRecommendations, setTopRecommendations] = useState([]);
+  const [recommendationsLoading, setRecommendationsLoading] = useState(true);
 
   useEffect(() => {
     const fetchSeekerOverview = async () => {
@@ -47,6 +49,38 @@ export default function Dashboard() {
 
     fetchSeekerOverview();
   }, []);
+
+  useEffect(() => {
+    const fetchTopRecommendations = async () => {
+      try {
+        setRecommendationsLoading(true);
+
+        const storedUser = localStorage.getItem('ai_jobs_user');
+        const parsedUser = storedUser ? JSON.parse(storedUser) : null;
+        const userId = user?.id || user?._id || parsedUser?.id || parsedUser?._id;
+
+        const query = userId ? `?userId=${encodeURIComponent(userId)}` : '';
+        const res = await fetch(`${API_BASE}/api/recommendations${query}`);
+        const data = await res.json();
+
+        if (data.success) {
+          const ranked = Array.isArray(data.data)
+            ? [...data.data].sort((a, b) => (b.matchScore || 0) - (a.matchScore || 0)).slice(0, 2)
+            : [];
+          setTopRecommendations(ranked);
+        } else {
+          setTopRecommendations([]);
+        }
+      } catch (error) {
+        console.error('Failed to fetch top recommendations:', error);
+        setTopRecommendations([]);
+      } finally {
+        setRecommendationsLoading(false);
+      }
+    };
+
+    fetchTopRecommendations();
+  }, [user?.id, user?._id]);
 
   const stats = [
     { label: 'Applications', value: overviewStats.applicationsCount, icon: FileText, color: 'text-blue-400', trend: 'Live from your profile' },
@@ -131,25 +165,37 @@ export default function Dashboard() {
           </div>
 
           <div className="space-y-4">
-             {[1, 2].map((i) => (
-                <div key={i} className="glass-panel p-6 border-white/5 hover:bg-white/5 transition-all cursor-pointer group">
-                  <div className="flex items-start justify-between">
-                    <div className="flex gap-4">
-                      <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center group-hover:border-indigo-primary transition-colors">
-                        <Briefcase size={22} className="text-indigo-primary" />
+            {recommendationsLoading ? (
+              <div className="glass-panel p-6 border-white/5 text-sm text-gray-400 font-medium">
+                Loading best matches...
+              </div>
+            ) : topRecommendations.length === 0 ? (
+              <div className="glass-panel p-6 border-white/5 text-sm text-gray-400 font-medium">
+                No recommendations available yet. Complete your profile to improve matching.
+              </div>
+            ) : (
+              topRecommendations.map((rec) => (
+                <Link key={rec.id} to={`/jobs/${rec.id}`} className="block">
+                  <div className="glass-panel p-6 border-white/5 hover:bg-white/5 transition-all cursor-pointer group">
+                    <div className="flex items-start justify-between">
+                      <div className="flex gap-4">
+                        <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center group-hover:border-indigo-primary transition-colors">
+                          <Briefcase size={22} className="text-indigo-primary" />
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-lg text-white mb-1">{rec.title || 'Untitled Role'}</h4>
+                          <p className="text-sm text-gray-400">{rec.company || 'Unknown Company'} • {rec.location || 'Location not specified'}</p>
+                        </div>
                       </div>
-                      <div>
-                        <h4 className="font-bold text-lg text-white mb-1">Senior Frontend Developer</h4>
-                        <p className="text-sm text-gray-400">Google Inc. • Remote</p>
+                      <div className="text-right">
+                        <div className="text-sm font-black text-green-400 mb-1">{rec.matchScore || 0}% Match</div>
+                        <div className="text-xs text-gray-500">{rec.salary || 'Salary not specified'}</div>
                       </div>
-                    </div>
-                    <div className="text-right">
-                       <div className="text-sm font-black text-green-400 mb-1">94% Match</div>
-                       <div className="text-xs text-gray-500">$150k - $220k</div>
                     </div>
                   </div>
-                </div>
-             ))}
+                </Link>
+              ))
+            )}
           </div>
         </div>
 
