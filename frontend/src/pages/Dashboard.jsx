@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { FileText, Bookmark, Eye, Target, Plus, Briefcase, Zap, Sparkles, TrendingUp } from 'lucide-react';
+import { FileText, Bookmark, Eye, Target, Plus, Briefcase, Zap, Sparkles } from 'lucide-react';
 import { motion as Motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 
@@ -116,14 +116,6 @@ export default function Dashboard() {
             <h1 className="text-4xl md:text-5xl font-syne font-extrabold mb-3 text-white">
               {user?.profileCompleted ? 'Welcome Back,' : 'Welcome,'} <span className="text-indigo-primary">{user?.name?.split(' ')[0]}!</span>
             </h1>
-            <p className="text-lg text-gray-400 font-medium max-w-xl">
-              Your profile is <span className="text-green-400 font-black">85% complete</span>. Complete your skills to unlock more AI-driven opportunities.
-            </p>
-          </div>
-          <div className="ml-auto">
-            <Link to="/build-resume" className="btn-primary px-8 py-4 shadow-xl">
-              <TrendingUp size={20} /> Update Profile
-            </Link>
           </div>
         </div>
       </Motion.div>
