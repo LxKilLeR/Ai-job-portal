@@ -3,18 +3,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { User, Mail, Shield, MapPin, Briefcase, Camera, Edit3, Settings, LogOut, Link as LinkIcon, Globe, X, Save } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { getApiBase, getStoredToken, getStoredUser, safeParseJson } from '../../utils/apiHelpers';
 
-const API_BASE = import.meta.env.VITE_API_URL || '';
-
-const getStoredToken = () => {
-  try {
-    const storedUser = localStorage.getItem('ai_jobs_user');
-    const parsed = storedUser ? JSON.parse(storedUser) : null;
-    return parsed?.token || localStorage.getItem('token') || '';
-  } catch (error) {
-    return localStorage.getItem('token') || '';
-  }
-};
+const API_BASE = getApiBase();
 
 export default function RecruiterProfile() {
   const { user, logout, updateUser } = useAuth();
@@ -54,13 +45,7 @@ export default function RecruiterProfile() {
   // Fetch fresh user data from backend on mount
   useEffect(() => {
     const fetchProfile = async () => {
-      let cachedUser = null;
-      try {
-        const storedUser = localStorage.getItem('ai_jobs_user');
-        cachedUser = storedUser ? JSON.parse(storedUser) : null;
-      } catch (error) {
-        cachedUser = null;
-      }
+      const cachedUser = getStoredUser();
 
       try {
         const token = getStoredToken();
@@ -69,7 +54,10 @@ export default function RecruiterProfile() {
             'Authorization': `Bearer ${token}`
           }
         });
-        const data = await res.json();
+        const data = await safeParseJson(res);
+        if (!data) {
+          throw new Error('Server returned non-JSON response');
+        }
         if (data.success) {
           // Keep auth context and storage in sync with latest profile values.
           updateUser({
@@ -134,7 +122,10 @@ export default function RecruiterProfile() {
           }
         });
 
-        const data = await res.json();
+        const data = await safeParseJson(res);
+        if (!data) {
+          throw new Error('Server returned non-JSON response');
+        }
         if (data.success) {
           setLatestJobs(Array.isArray(data.data) ? data.data.slice(0, 2) : []);
         } else {
@@ -161,7 +152,10 @@ export default function RecruiterProfile() {
           }
         });
 
-        const data = await res.json();
+        const data = await safeParseJson(res);
+        if (!data) {
+          throw new Error('Server returned non-JSON response');
+        }
         if (data.success) {
           setOverviewStats({
             totalJobs: data.data?.totalJobs || 0,
@@ -198,7 +192,10 @@ export default function RecruiterProfile() {
         body: JSON.stringify(formData)
       });
 
-      const data = await res.json();
+      const data = await safeParseJson(res);
+      if (!data) {
+        throw new Error('Server returned non-JSON response');
+      }
 
       if (data.success) {
         updateUser({

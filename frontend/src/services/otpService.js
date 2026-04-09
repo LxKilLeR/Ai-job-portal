@@ -1,6 +1,7 @@
 import axios from 'axios';
+import { getApiBase } from '../utils/apiHelpers';
 
-const API_URL = import.meta.env.VITE_API_URL || '';
+const API_URL = getApiBase();
 
 // Request OTP for signup
 export const requestOTP = async (data) => {
