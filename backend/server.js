@@ -19,20 +19,46 @@ const configuredOrigins = (process.env.FRONTEND_URL || '')
   .split(',')
   .map((origin) => origin.trim())
   .filter(Boolean);
-const defaultProductionOrigins = ['https://aijob-portal.netlify.app'];
+const defaultProductionOrigins = [
+  'https://aijob-portal.netlify.app',
+  'https://ai-job-portal-six.vercel.app'
+];
 const allowedOrigins = Array.from(new Set([
   ...configuredOrigins,
   ...(isProduction ? defaultProductionOrigins : ['http://localhost:3000'])
 ]));
 
-app.use(cors({
+const allowedOriginPatterns = [
+  /^https:\/\/[a-zA-Z0-9-]+\.vercel\.app$/
+];
+
+const corsOptions = {
   origin: (origin, callback) => {
     // Allow server-to-server and tools without Origin header.
     if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) return callback(null, true);
-    return callback(new Error(`CORS blocked for origin: ${origin}`));
+
+    const isExactMatch = allowedOrigins.includes(origin);
+    const isPatternMatch = allowedOriginPatterns.some((pattern) => pattern.test(origin));
+
+    if (isExactMatch || isPatternMatch) {
+      return callback(null, true);
+    }
+
+    console.warn(`CORS blocked for origin: ${origin}`);
+    return callback(null, false);
+  },
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  optionsSuccessStatus: 204
+};
+
+app.use(cors(corsOptions));
+app.use((req, res, next) => {
+  if (req.method === 'OPTIONS') {
+    return cors(corsOptions)(req, res, next);
   }
-}));
+  return next();
+});
 app.use(express.json());
 
 // API Routes
