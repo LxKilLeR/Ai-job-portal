@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { motion as Motion, AnimatePresence } from 'framer-motion';
 import html2pdf from 'html2pdf.js';
+import html2canvas from 'html2canvas';
+import { jsPDF } from 'jspdf';
 import { Download, LayoutTemplate, FileEdit, Sparkles, Wand2, Eye, Split, Trash2, Plus, FileText } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -134,9 +136,47 @@ export default function ResumeBuilder() {
       }
 
       await pdfGenerator().set(opt).from(el).save();
-    } catch (error) {
-      console.error('PDF export failed:', error);
-      setExportError('PDF export failed. Please try again.');
+    } catch (primaryError) {
+      console.error('Primary PDF export failed, trying fallback:', primaryError);
+
+      try {
+        const canvas = await html2canvas(el, {
+          scale: 2,
+          useCORS: true,
+          backgroundColor: '#ffffff'
+        });
+
+        const imgData = canvas.toDataURL('image/jpeg', 0.98);
+        const pdf = new jsPDF({
+          orientation: 'portrait',
+          unit: 'pt',
+          format: 'a4'
+        });
+
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const pageHeight = pdf.internal.pageSize.getHeight();
+        const imgWidth = pageWidth;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+        let heightLeft = imgHeight;
+        let position = 0;
+
+        pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+
+        while (heightLeft > 0) {
+          position = heightLeft - imgHeight;
+          pdf.addPage();
+          pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+          heightLeft -= pageHeight;
+        }
+
+        pdf.save(`${pdfName}.pdf`);
+      } catch (fallbackError) {
+        console.error('Fallback PDF export failed:', fallbackError);
+        const fallbackMessage = fallbackError instanceof Error ? fallbackError.message : 'Unknown error';
+        setExportError(`PDF export failed. ${fallbackMessage}`);
+      }
     } finally {
       setIsExporting(false);
     }
