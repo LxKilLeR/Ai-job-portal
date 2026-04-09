@@ -1,11 +1,16 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || '';
+const API_URL = (import.meta.env.VITE_API_URL || 'https://ai-job-portal-backend-1.onrender.com').replace(/\/$/, '');
 
 // Helper to get auth headers
 const getAuthHeaders = () => {
-  const userStr = localStorage.getItem('ai_jobs_user');
-  const token = userStr ? JSON.parse(userStr).token : null;
+  let token = null;
+  try {
+    const userStr = localStorage.getItem('ai_jobs_user');
+    token = userStr ? JSON.parse(userStr).token : null;
+  } catch (error) {
+    token = localStorage.getItem('token');
+  }
   return {
     'Content-Type': 'application/json',
     ...(token && { 'Authorization': `Bearer ${token}` })

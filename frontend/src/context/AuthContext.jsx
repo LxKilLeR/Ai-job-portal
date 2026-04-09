@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const AuthContext = createContext();
 const API_BASE = (import.meta.env.VITE_API_URL || '').trim();
-const FALLBACK_API_BASE = 'https://ai-job-portal-98k6.onrender.com';
+const FALLBACK_API_BASE = 'https://ai-job-portal-backend-1.onrender.com';
 
 const getApiBase = () => (API_BASE || FALLBACK_API_BASE).replace(/\/$/, '');
 
@@ -32,11 +32,15 @@ export const AuthProvider = ({ children }) => {
     const storedUser = localStorage.getItem('ai_jobs_user');
     const storedToken = localStorage.getItem('token');
     if (storedUser) {
-      const parsedUser = JSON.parse(storedUser);
-      if (!parsedUser.token && storedToken) {
-        parsedUser.token = storedToken;
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        if (!parsedUser.token && storedToken) {
+          parsedUser.token = storedToken;
+        }
+        setUser(parsedUser);
+      } catch (error) {
+        localStorage.removeItem('ai_jobs_user');
       }
-      setUser(parsedUser);
     }
     setLoading(false);
   }, []);

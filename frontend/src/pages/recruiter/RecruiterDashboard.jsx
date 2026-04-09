@@ -5,11 +5,25 @@ import {
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid
 } from 'recharts';
 
-const API_BASE = import.meta.env.VITE_API_URL || '';
+const API_BASE = (import.meta.env.VITE_API_URL || 'https://ai-job-portal-backend-1.onrender.com').replace(/\/$/, '');
+
+const parseJsonSafe = async (response) => {
+  const text = await response.text();
+  try {
+    return JSON.parse(text);
+  } catch (error) {
+    return { success: false, message: 'Server returned an invalid response.' };
+  }
+};
 
 function getAuthHeaders() {
-  const userStr = localStorage.getItem('ai_jobs_user');
-  const token = userStr ? JSON.parse(userStr).token : null;
+  let token = null;
+  try {
+    const userStr = localStorage.getItem('ai_jobs_user');
+    token = userStr ? JSON.parse(userStr).token : null;
+  } catch (error) {
+    token = localStorage.getItem('token');
+  }
   return {
     'Content-Type': 'application/json',
     ...(token && { 'Authorization': `Bearer ${token}` })
@@ -72,9 +86,9 @@ export default function RecruiterDashboard() {
         fetch(`${API_BASE}/api/recruiter/jobs?status=active&limit=3`, { headers: getAuthHeaders() })
       ]);
 
-      const overviewData = await overviewRes.json();
-      const analyticsConfig = await analyticsRes.json();
-      const jobsConfig = await jobsRes.json();
+      const overviewData = await parseJsonSafe(overviewRes);
+      const analyticsConfig = await parseJsonSafe(analyticsRes);
+      const jobsConfig = await parseJsonSafe(jobsRes);
 
       // Debug: log responses
       console.log('Overview response:', overviewRes.status, overviewData);

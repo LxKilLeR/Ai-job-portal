@@ -5,7 +5,7 @@ import { ChevronDown, ChevronUp, Sparkles, Brain } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
-const API_BASE = import.meta.env.VITE_API_URL || '';
+const API_BASE = (import.meta.env.VITE_API_URL || 'https://ai-job-portal-backend-1.onrender.com').replace(/\/$/, '');
 
 export default function AIRecommendations() {
   const { user } = useAuth();

@@ -2,11 +2,25 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, ChevronUp, CheckCircle, XCircle, Star, Briefcase, AlertTriangle, RefreshCw, Loader2 } from 'lucide-react';
 
-const API_BASE = import.meta.env.VITE_API_URL || '';
+const API_BASE = (import.meta.env.VITE_API_URL || 'https://ai-job-portal-backend-1.onrender.com').replace(/\/$/, '');
+
+const parseJsonSafe = async (response) => {
+  const text = await response.text();
+  try {
+    return JSON.parse(text);
+  } catch (error) {
+    return { success: false, message: 'Server returned an invalid response.' };
+  }
+};
 
 function getAuthHeaders() {
-  const userStr = localStorage.getItem('ai_jobs_user');
-  const token = userStr ? JSON.parse(userStr).token : null;
+  let token = null;
+  try {
+    const userStr = localStorage.getItem('ai_jobs_user');
+    token = userStr ? JSON.parse(userStr).token : null;
+  } catch (error) {
+    token = localStorage.getItem('token');
+  }
   return {
     'Content-Type': 'application/json',
     ...(token && { 'Authorization': `Bearer ${token}` })
@@ -64,8 +78,8 @@ export default function Applicants() {
         fetch(`${API_BASE}/api/recruiter/applications?limit=100`, { headers: getAuthHeaders() })
       ]);
 
-      const jobsData = await jobsRes.json();
-      const appsData = await appsRes.json();
+      const jobsData = await parseJsonSafe(jobsRes);
+      const appsData = await parseJsonSafe(appsRes);
 
       if (jobsRes.ok && appsRes.ok) {
         setJobs(jobsData.data);
@@ -87,7 +101,7 @@ export default function Applicants() {
         headers: getAuthHeaders(),
         body: JSON.stringify({ status })
       });
-      const data = await res.json();
+      const data = await parseJsonSafe(res);
       if (res.ok) {
         setApplicants(prev => prev.map(a => a._id === id ? { ...a, status: data.data.status } : a));
         fetchData();
