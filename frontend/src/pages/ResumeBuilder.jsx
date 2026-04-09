@@ -139,7 +139,13 @@ export default function ResumeBuilder() {
   const firstName = nameParts[0] || '';
   const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
   const parsedSkills = String(data.skills || '').split(',').map((s) => s.trim()).filter(Boolean);
-  const parsedLanguages = String(data.languages || '').split(',').map((s) => s.trim()).filter(Boolean);
+  const rawLanguages = String(data.languages || '').trim();
+  const parsedLanguages = rawLanguages
+    .split(/[,;\n|]+/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+  const hasLanguages = parsedLanguages.length > 0 || rawLanguages.length > 0;
+  const languagesDisplay = parsedLanguages.length > 0 ? parsedLanguages.join(', ') : rawLanguages;
 
   return (
     <div className="flex flex-col h-[calc(100vh-160px)]">
@@ -386,10 +392,10 @@ export default function ResumeBuilder() {
                            <h2 className="text-base font-outfit font-extrabold uppercase border-b-2 border-slate-200 mb-3 tracking-[0.08em] text-indigo-900 break-words leading-tight">Achievements</h2>
                            <pre className="text-sm font-sans whitespace-pre-wrap leading-relaxed text-slate-700">{data.achievements}</pre>
                          </div>
-                         {!!parsedLanguages.length && (
+                         {hasLanguages && (
                            <div className="min-w-0">
                              <h2 className="text-base font-outfit font-extrabold uppercase border-b-2 border-slate-200 mb-3 tracking-[0.08em] text-indigo-900 break-words leading-tight">Languages</h2>
-                             <p className="text-sm font-sans whitespace-pre-wrap leading-relaxed text-slate-700">{parsedLanguages.join(', ')}</p>
+                             <p className="text-sm font-sans whitespace-pre-wrap leading-relaxed text-slate-700">{languagesDisplay}</p>
                            </div>
                          )}
                        </section>
@@ -417,13 +423,15 @@ export default function ResumeBuilder() {
                                </div>
                             </div>
 
-                            {!!parsedLanguages.length && (
+                            {hasLanguages && (
                               <div>
                                 <h3 className="text-xs font-black uppercase tracking-widest text-indigo-500 mb-4">Languages</h3>
                                 <div className="flex flex-wrap gap-2">
-                                  {parsedLanguages.map((lang) => (
+                                  {parsedLanguages.length > 0 ? parsedLanguages.map((lang) => (
                                     <span key={lang} className="px-2 py-1 bg-white/5 border border-white/5 rounded text-[9px] font-bold block">{lang}</span>
-                                  ))}
+                                  )) : (
+                                    <span className="px-2 py-1 bg-white/5 border border-white/5 rounded text-[9px] font-bold block">{languagesDisplay}</span>
+                                  )}
                                 </div>
                               </div>
                             )}
@@ -451,7 +459,7 @@ export default function ResumeBuilder() {
                              <p className="text-sm font-bold text-slate-800 whitespace-pre-wrap leading-relaxed">{data.education}</p>
                           </section>
 
-                          {(data.certifications || data.achievements || parsedLanguages.length > 0) && (
+                          {(data.certifications || data.achievements || hasLanguages) && (
                             <section className="mt-12 space-y-6">
                               {!!data.certifications && (
                                 <div className="min-w-0">
@@ -465,10 +473,10 @@ export default function ResumeBuilder() {
                                   <pre className="text-xs font-sans whitespace-pre-wrap leading-relaxed text-slate-700">{data.achievements}</pre>
                                 </div>
                               )}
-                              {!!parsedLanguages.length && (
+                              {hasLanguages && (
                                 <div className="min-w-0">
                                   <h3 className="text-[10px] font-extrabold uppercase tracking-[0.08em] text-indigo-500 mb-4 border-b border-slate-100 pb-2 break-words leading-tight">Languages</h3>
-                                  <p className="text-xs font-sans whitespace-pre-wrap leading-relaxed text-slate-700">{parsedLanguages.join(', ')}</p>
+                                  <p className="text-xs font-sans whitespace-pre-wrap leading-relaxed text-slate-700">{languagesDisplay}</p>
                                 </div>
                               )}
                             </section>
