@@ -27,6 +27,8 @@ export default function ResumeBuilder() {
   });
 
   const [profileLoading, setProfileLoading] = useState(true);
+  const [isExporting, setIsExporting] = useState(false);
+  const [exportError, setExportError] = useState('');
 
   const [template, setTemplate] = useState('modern');
   const [view, setView] = useState('split'); // 'split', 'editor', 'preview'
@@ -105,19 +107,39 @@ export default function ResumeBuilder() {
     loadProfileAndResume();
   }, [user?.id, user?._id, user?.token]);
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
     const el = printRef.current;
-    if (!el) return;
+    if (!el || isExporting) return;
+
+    setExportError('');
+    setIsExporting(true);
+
+    const pdfName = String(data.name || 'Resume')
+      .trim()
+      .replace(/\s+/g, '_')
+      .replace(/[^a-zA-Z0-9_-]/g, '') || 'Resume';
     
     const opt = {
       margin: 0,
-      filename: `Resume_${data.name.replace(/\s+/g, '_')}.pdf`,
+      filename: `${pdfName}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
       html2canvas: { scale: 3, useCORS: true, letterRendering: true },
       jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
     };
-    
-    html2pdf().set(opt).from(el).save();
+
+    try {
+      const pdfGenerator = typeof html2pdf === 'function' ? html2pdf : html2pdf?.default;
+      if (!pdfGenerator) {
+        throw new Error('PDF library could not be initialized.');
+      }
+
+      await pdfGenerator().set(opt).from(el).save();
+    } catch (error) {
+      console.error('PDF export failed:', error);
+      setExportError('PDF export failed. Please try again.');
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   const handleMagicFill = () => {
@@ -202,12 +224,19 @@ export default function ResumeBuilder() {
           </button>
           <button 
             onClick={handleDownload}
+            disabled={isExporting}
             className="btn-primary px-6 py-2.5 text-sm font-bold shadow-[0_0_20px_rgba(79,110,247,0.3)]"
           >
-            <Download size={18} /> Export PDF
+            <Download size={18} /> {isExporting ? 'Exporting...' : 'Export PDF'}
           </button>
         </div>
       </div>
+
+      {exportError && (
+        <div className="mb-4 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm font-semibold text-red-300">
+          {exportError}
+        </div>
+      )}
 
       <div className="flex-1 flex gap-8 min-h-0 overflow-hidden">
         {/* Editor Pane */}
