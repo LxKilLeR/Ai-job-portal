@@ -4,12 +4,12 @@ import { Briefcase, Users, Zap, Eye, TrendingUp, TrendingDown, Loader2 } from 'l
 import {
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid
 } from 'recharts';
+import { getApiBase, getStoredToken, safeParseJson } from '../../utils/apiHelpers';
 
-const API_BASE = import.meta.env.VITE_API_URL || '';
+const API_BASE = getApiBase();
 
 function getAuthHeaders() {
-  const userStr = localStorage.getItem('ai_jobs_user');
-  const token = userStr ? JSON.parse(userStr).token : null;
+  const token = getStoredToken();
   return {
     'Content-Type': 'application/json',
     ...(token && { 'Authorization': `Bearer ${token}` })
@@ -72,9 +72,12 @@ export default function RecruiterDashboard() {
         fetch(`${API_BASE}/api/recruiter/jobs?status=active&limit=3`, { headers: getAuthHeaders() })
       ]);
 
-      const overviewData = await overviewRes.json();
-      const analyticsConfig = await analyticsRes.json();
-      const jobsConfig = await jobsRes.json();
+      const overviewData = await safeParseJson(overviewRes);
+      const analyticsConfig = await safeParseJson(analyticsRes);
+      const jobsConfig = await safeParseJson(jobsRes);
+      if (!overviewData || !analyticsConfig || !jobsConfig) {
+        throw new Error('Server returned non-JSON response');
+      }
 
       // Debug: log responses
       console.log('Overview response:', overviewRes.status, overviewData);

@@ -1,27 +1,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { getApiBase, getStoredUser, safeParseJson } from '../utils/apiHelpers';
 
 const AuthContext = createContext();
-const API_BASE = (import.meta.env.VITE_API_URL || '').trim();
-const FALLBACK_API_BASE = 'https://ai-job-portal-98k6.onrender.com';
-
-const getApiBase = () => (API_BASE || FALLBACK_API_BASE).replace(/\/$/, '');
-
-const parseJsonResponse = async (res) => {
-  const raw = await res.text();
-  if (!raw) {
-    return { ok: false, data: null, message: 'Empty response from server' };
-  }
-
-  try {
-    return { ok: true, data: JSON.parse(raw), message: '' };
-  } catch (error) {
-    return { ok: false, data: null, message: 'Server returned invalid JSON response' };
-  }
-};
-
-const requireApiBase = () => {
-  return getApiBase();
-};
+const API_BASE = getApiBase();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -29,32 +10,28 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     // Check if user is logged in
-    const storedUser = localStorage.getItem('ai_jobs_user');
+    const storedUser = getStoredUser();
     const storedToken = localStorage.getItem('token');
     if (storedUser) {
-      const parsedUser = JSON.parse(storedUser);
-      if (!parsedUser.token && storedToken) {
-        parsedUser.token = storedToken;
+      if (!storedUser.token && storedToken) {
+        storedUser.token = storedToken;
       }
-      setUser(parsedUser);
+      setUser(storedUser);
     }
     setLoading(false);
   }, []);
 
   const login = async (email, password) => {
     try {
-      const res = await fetch(`${requireApiBase()}/api/auth/login`, {
+      const res = await fetch(`${API_BASE}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       });
-      const parsed = await parseJsonResponse(res);
-
-      if (!parsed.ok) {
-        return { success: false, message: parsed.message };
+      const data = await safeParseJson(res);
+      if (!data) {
+        return { success: false, message: 'Server returned invalid JSON response' };
       }
-
-      const data = parsed.data;
       if (res.ok && data.success) {
         const user = {
           id: data.user.id || 'u1',

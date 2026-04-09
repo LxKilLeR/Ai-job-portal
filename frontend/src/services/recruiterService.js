@@ -1,11 +1,11 @@
 import axios from 'axios';
+import { getApiBase, getStoredToken } from '../utils/apiHelpers';
 
-const API_URL = import.meta.env.VITE_API_URL || '';
+const API_URL = getApiBase();
 
 // Helper to get auth headers
 const getAuthHeaders = () => {
-  const userStr = localStorage.getItem('ai_jobs_user');
-  const token = userStr ? JSON.parse(userStr).token : null;
+  const token = getStoredToken();
   return {
     'Content-Type': 'application/json',
     ...(token && { 'Authorization': `Bearer ${token}` })

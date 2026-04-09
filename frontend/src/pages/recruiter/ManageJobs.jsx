@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Edit2, Trash2, Pause, Play, MapPin, DollarSign, Users, ChevronDown, ChevronUp, X, RefreshCw } from 'lucide-react';
+import { getApiBase, getStoredToken, getStoredUser, safeParseJson } from '../../utils/apiHelpers';
 
-const API_BASE = import.meta.env.VITE_API_URL || '';
+const API_BASE = getApiBase();
 
 function getAuthHeaders() {
-  const userStr = localStorage.getItem('ai_jobs_user');
-  const token = userStr ? JSON.parse(userStr).token : null;
+  const token = getStoredToken();
   return {
     'Content-Type': 'application/json',
     ...(token && { 'Authorization': `Bearer ${token}` })
@@ -31,8 +31,7 @@ export default function ManageJobs() {
       setError(null);
 
       // Debug: Check auth token
-      const userStr = localStorage.getItem('ai_jobs_user');
-      const user = userStr ? JSON.parse(userStr) : null;
+      const user = getStoredUser();
       console.log('🔍 Auth user data:', user);
 
       if (!user || !user.token) {
@@ -47,7 +46,10 @@ export default function ManageJobs() {
       const res = await fetch(`${API_BASE}/api/recruiter/jobs?limit=100`, { headers });
       console.log('🔍 Jobs API response status:', res.status, res.statusText);
 
-      const data = await res.json();
+      const data = await safeParseJson(res);
+      if (!data) {
+        throw new Error('Invalid JSON response from backend');
+      }
       console.log('🔍 Jobs API response data:', data);
 
       if (data.success) {
@@ -83,7 +85,10 @@ export default function ManageJobs() {
         method: 'PATCH',
         headers: getAuthHeaders()
       });
-      const data = await res.json();
+      const data = await safeParseJson(res);
+      if (!data) {
+        throw new Error('Invalid JSON response from backend');
+      }
       if (data.success) {
         setJobs(prev => prev.map(j =>
           j._id === id ? { ...j, status: j.status === 'Active' ? 'Paused' : 'Active' } : j
@@ -100,7 +105,10 @@ export default function ManageJobs() {
         method: 'DELETE',
         headers: getAuthHeaders()
       });
-      const data = await res.json();
+      const data = await safeParseJson(res);
+      if (!data) {
+        throw new Error('Invalid JSON response from backend');
+      }
       if (data.success) {
         setJobs(prev => prev.filter(j => j._id !== id));
         setDeleteConfirm(null);
@@ -123,7 +131,10 @@ export default function ManageJobs() {
           description: editJob.description,
         })
       });
-      const data = await res.json();
+      const data = await safeParseJson(res);
+      if (!data) {
+        throw new Error('Invalid JSON response from backend');
+      }
       if (data.success) {
         setJobs(prev => prev.map(j =>
           j._id === editJob._id

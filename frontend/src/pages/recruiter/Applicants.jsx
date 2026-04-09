@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, ChevronUp, CheckCircle, XCircle, Star, Briefcase, AlertTriangle, RefreshCw, Loader2 } from 'lucide-react';
+import { getApiBase, getStoredToken, safeParseJson } from '../../utils/apiHelpers';
 
-const API_BASE = import.meta.env.VITE_API_URL || '';
+const API_BASE = getApiBase();
 
 function getAuthHeaders() {
-  const userStr = localStorage.getItem('ai_jobs_user');
-  const token = userStr ? JSON.parse(userStr).token : null;
+  const token = getStoredToken();
   return {
     'Content-Type': 'application/json',
     ...(token && { 'Authorization': `Bearer ${token}` })
@@ -64,8 +64,12 @@ export default function Applicants() {
         fetch(`${API_BASE}/api/recruiter/applications?limit=100`, { headers: getAuthHeaders() })
       ]);
 
-      const jobsData = await jobsRes.json();
-      const appsData = await appsRes.json();
+      const jobsData = await safeParseJson(jobsRes);
+      const appsData = await safeParseJson(appsRes);
+
+      if (!jobsData || !appsData) {
+        throw new Error('Server returned non-JSON response');
+      }
 
       if (jobsRes.ok && appsRes.ok) {
         setJobs(jobsData.data);
@@ -87,7 +91,10 @@ export default function Applicants() {
         headers: getAuthHeaders(),
         body: JSON.stringify({ status })
       });
-      const data = await res.json();
+      const data = await safeParseJson(res);
+      if (!data) {
+        throw new Error('Server returned non-JSON response');
+      }
       if (res.ok) {
         setApplicants(prev => prev.map(a => a._id === id ? { ...a, status: data.data.status } : a));
         fetchData();
