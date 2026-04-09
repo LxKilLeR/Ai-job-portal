@@ -2,8 +2,9 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Bell, Briefcase, LogOut } from 'lucide-react';
+import { getApiBase, safeParseJson } from '../utils/apiHelpers';
 
-const API_BASE = import.meta.env.VITE_API_URL || '';
+const API_BASE = getApiBase();
 
 export default function Navbar() {
   const { user, logout } = useAuth();
@@ -26,7 +27,11 @@ export default function Navbar() {
           Authorization: `Bearer ${authToken}`
         }
       });
-      const data = await res.json();
+      const data = await safeParseJson(res);
+      if (!data) {
+        console.error('Notifications API returned non-JSON response');
+        return;
+      }
       if (res.ok && data.success) {
         setNotifications(data.data || []);
         setUnreadCount(data?.meta?.unreadCount || 0);

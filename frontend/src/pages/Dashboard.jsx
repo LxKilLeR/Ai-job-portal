@@ -3,12 +3,12 @@ import { useAuth } from '../context/AuthContext';
 import { FileText, Bookmark, Eye, Target, Plus, Briefcase, Zap, Sparkles, TrendingUp } from 'lucide-react';
 import { motion as Motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import { getApiBase, getStoredToken, getStoredUser, safeParseJson } from '../utils/apiHelpers';
 
-const API_BASE = import.meta.env.VITE_API_URL || '';
+const API_BASE = getApiBase();
 
 const getAuthHeaders = () => {
-  const userStr = localStorage.getItem('ai_jobs_user');
-  const token = userStr ? JSON.parse(userStr).token : null;
+  const token = getStoredToken();
   return {
     'Content-Type': 'application/json',
     ...(token && { Authorization: `Bearer ${token}` })
@@ -33,7 +33,10 @@ export default function Dashboard() {
           headers: getAuthHeaders()
         });
 
-        const data = await res.json();
+        const data = await safeParseJson(res);
+        if (!data) {
+          throw new Error('Server returned non-JSON response');
+        }
         if (data.success) {
           setOverviewStats({
             applicationsCount: data.data?.applicationsCount || 0,
@@ -55,13 +58,15 @@ export default function Dashboard() {
       try {
         setRecommendationsLoading(true);
 
-        const storedUser = localStorage.getItem('ai_jobs_user');
-        const parsedUser = storedUser ? JSON.parse(storedUser) : null;
+        const parsedUser = getStoredUser();
         const userId = user?.id || user?._id || parsedUser?.id || parsedUser?._id;
 
         const query = userId ? `?userId=${encodeURIComponent(userId)}` : '';
         const res = await fetch(`${API_BASE}/api/recommendations${query}`);
-        const data = await res.json();
+        const data = await safeParseJson(res);
+        if (!data) {
+          throw new Error('Server returned non-JSON response');
+        }
 
         if (data.success) {
           const ranked = Array.isArray(data.data)
