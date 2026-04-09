@@ -1,17 +1,58 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { FileText, Bookmark, Eye, Target, Plus, Briefcase, Zap, Sparkles, TrendingUp } from 'lucide-react';
 import { motion as Motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 
+const API_BASE = import.meta.env.VITE_API_URL || '';
+
+const getAuthHeaders = () => {
+  const userStr = localStorage.getItem('ai_jobs_user');
+  const token = userStr ? JSON.parse(userStr).token : null;
+  return {
+    'Content-Type': 'application/json',
+    ...(token && { Authorization: `Bearer ${token}` })
+  };
+};
+
 export default function Dashboard() {
   const { user } = useAuth();
+  const [overviewStats, setOverviewStats] = useState({
+    applicationsCount: 0,
+    savedJobsCount: 0,
+    profileViews: 0,
+    matchScore: 0
+  });
+
+  useEffect(() => {
+    const fetchSeekerOverview = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/api/auth/seeker-overview`, {
+          headers: getAuthHeaders()
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          setOverviewStats({
+            applicationsCount: data.data?.applicationsCount || 0,
+            savedJobsCount: data.data?.savedJobsCount || 0,
+            profileViews: data.data?.profileViews || 0,
+            matchScore: data.data?.matchScore || 0
+          });
+        }
+      } catch (error) {
+        console.error('Failed to fetch seeker overview:', error);
+      }
+    };
+
+    fetchSeekerOverview();
+  }, []);
 
   const stats = [
-    { label: 'Applications', value: '12', icon: FileText, color: 'text-blue-400', trend: '+2 this week' },
-    { label: 'Saved Jobs', value: '08', icon: Bookmark, color: 'text-amber-400', trend: '3 expiring soon' },
-    { label: 'Profile Views', value: '142', icon: Eye, color: 'text-green-400', trend: '+15% growth' },
-    { label: 'Match Score', value: '88%', icon: Target, color: 'text-indigo-primary', trend: 'Top 5% of users' }
+    { label: 'Applications', value: overviewStats.applicationsCount, icon: FileText, color: 'text-blue-400', trend: 'Live from your profile' },
+    { label: 'Saved Jobs', value: overviewStats.savedJobsCount, icon: Bookmark, color: 'text-amber-400', trend: 'Live from your profile' },
+    { label: 'Profile Views', value: overviewStats.profileViews, icon: Eye, color: 'text-green-400', trend: 'Live from your profile' },
+    { label: 'Match Score', value: `${overviewStats.matchScore}%`, icon: Target, color: 'text-indigo-primary', trend: 'Average of your applications' }
   ];
 
   return (

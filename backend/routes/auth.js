@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const { OAuth2Client } = require('google-auth-library');
 const User = require('../models/User');
+const Application = require('../models/Application');
 const authMiddleware = require('../middleware/auth');
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
@@ -266,6 +267,55 @@ router.get('/me', authMiddleware, async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to fetch profile',
+      error: error.message
+    });
+  }
+});
+
+// GET /api/auth/seeker-overview - Dashboard stats for seekers
+router.get('/seeker-overview', authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('_id role');
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    if (user.role !== 'Seeker') {
+      return res.status(403).json({
+        success: false,
+        message: 'Only seekers can access this overview'
+      });
+    }
+
+    const seekerApplications = await Application.find({ applicant: user._id }).select('status matchScore');
+
+    const applicationsCount = seekerApplications.length;
+    const activeApplications = seekerApplications.filter((app) => ['pending', 'shortlisted'].includes(app.status)).length;
+    const acceptedApplications = seekerApplications.filter((app) => app.status === 'accepted').length;
+    const avgMatchScore = applicationsCount > 0
+      ? Math.round(seekerApplications.reduce((sum, app) => sum + (app.matchScore || 0), 0) / applicationsCount)
+      : 0;
+
+    res.json({
+      success: true,
+      data: {
+        applicationsCount,
+        activeApplications,
+        acceptedApplications,
+        savedJobsCount: 0,
+        profileViews: 0,
+        matchScore: avgMatchScore
+      }
+    });
+  } catch (error) {
+    console.error('Get seeker overview error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch seeker overview',
       error: error.message
     });
   }
