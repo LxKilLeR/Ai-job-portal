@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { FileText, Bookmark, Eye, Target, Plus, Briefcase, Zap, Sparkles } from 'lucide-react';
+import { FileText, Bookmark, Eye, Target, Plus, Briefcase, Zap, Sparkles, TrendingUp } from 'lucide-react';
 import { motion as Motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 
