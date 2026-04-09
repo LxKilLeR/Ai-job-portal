@@ -109,6 +109,167 @@ export default function ResumeBuilder() {
     loadProfileAndResume();
   }, [user?.id, user?._id, user?.token]);
 
+  const exportAsSimplePdf = (filename) => {
+    const pdf = new jsPDF({
+      orientation: 'portrait',
+      unit: 'pt',
+      format: 'a4'
+    });
+
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const margin = 40;
+    const maxWidth = pageWidth - margin * 2;
+    let y = margin;
+
+    const ensureSpace = (needed = 18) => {
+      if (y + needed > pageHeight - margin) {
+        pdf.addPage();
+        y = margin;
+      }
+    };
+
+    const addHeading = (text) => {
+      if (!text) return;
+      ensureSpace(26);
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(12);
+      pdf.text(text, margin, y);
+      y += 16;
+      pdf.setDrawColor(210, 210, 210);
+      pdf.line(margin, y, pageWidth - margin, y);
+      y += 12;
+    };
+
+    const addParagraph = (text) => {
+      if (!text) return;
+      const clean = String(text).trim();
+      if (!clean) return;
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(10.5);
+      const lines = pdf.splitTextToSize(clean, maxWidth);
+      lines.forEach((line) => {
+        ensureSpace(14);
+        pdf.text(line, margin, y);
+        y += 14;
+      });
+      y += 4;
+    };
+
+    const addKeyValue = (label, value) => {
+      const clean = String(value || '').trim();
+      if (!clean) return;
+      ensureSpace(14);
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(10.5);
+      const prefix = `${label}: `;
+      const prefixWidth = pdf.getTextWidth(prefix);
+      pdf.text(prefix, margin, y);
+      pdf.setFont('helvetica', 'normal');
+      const lines = pdf.splitTextToSize(clean, maxWidth - prefixWidth);
+      if (lines.length > 0) {
+        pdf.text(lines[0], margin + prefixWidth, y);
+      }
+      for (let i = 1; i < lines.length; i += 1) {
+        ensureSpace(14);
+        y += 14;
+        pdf.text(lines[i], margin, y);
+      }
+      y += 14;
+    };
+
+    const addBulletedLines = (value) => {
+      const lines = String(value || '')
+        .split(/\n+/)
+        .map((item) => item.replace(/^[-*•]\s*/, '').trim())
+        .filter(Boolean);
+
+      if (lines.length === 0) {
+        addParagraph(value);
+        return;
+      }
+
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(10.5);
+      lines.forEach((line) => {
+        const wrapped = pdf.splitTextToSize(line, maxWidth - 14);
+        wrapped.forEach((part, idx) => {
+          ensureSpace(14);
+          pdf.text(idx === 0 ? `• ${part}` : part, idx === 0 ? margin : margin + 10, y);
+          y += 14;
+        });
+      });
+      y += 4;
+    };
+
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(20);
+    const headingName = String(data.name || '').trim() || 'Resume';
+    pdf.text(headingName, margin, y);
+    y += 20;
+
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(11);
+    const roleLine = String(data.role || '').trim();
+    if (roleLine) {
+      pdf.text(roleLine, margin, y);
+      y += 16;
+    }
+
+    const contactLine = [data.email, data.phone, data.address]
+      .map((value) => String(value || '').trim())
+      .filter(Boolean)
+      .join(' | ');
+    if (contactLine) {
+      const wrappedContact = pdf.splitTextToSize(contactLine, maxWidth);
+      wrappedContact.forEach((line) => {
+        ensureSpace(14);
+        pdf.text(line, margin, y);
+        y += 14;
+      });
+    }
+
+    const socialLine = [data.linkedin, data.github]
+      .map((value) => String(value || '').trim())
+      .filter(Boolean)
+      .join(' | ');
+    if (socialLine) {
+      const wrappedSocial = pdf.splitTextToSize(socialLine, maxWidth);
+      wrappedSocial.forEach((line) => {
+        ensureSpace(14);
+        pdf.text(line, margin, y);
+        y += 14;
+      });
+    }
+
+    y += 8;
+    addHeading('Summary');
+    addParagraph(data.summary);
+
+    addHeading('Skills');
+    addParagraph(data.skills);
+
+    addHeading('Experience');
+    addBulletedLines(data.experience);
+
+    addHeading('Projects');
+    addBulletedLines(data.projects);
+
+    addHeading('Education');
+    addBulletedLines(data.education);
+
+    addHeading('Certifications');
+    addBulletedLines(data.certifications);
+
+    addHeading('Achievements');
+    addBulletedLines(data.achievements);
+
+    addHeading('Languages');
+    addParagraph(data.languages);
+
+    pdf.save(`${filename}.pdf`);
+  };
+
   const handleDownload = async () => {
     const el = printRef.current;
     if (!el || isExporting) return;
@@ -138,6 +299,16 @@ export default function ResumeBuilder() {
       await pdfGenerator().set(opt).from(el).save();
     } catch (primaryError) {
       console.error('Primary PDF export failed, trying fallback:', primaryError);
+
+      const primaryMessage = primaryError instanceof Error ? primaryError.message : '';
+      if (primaryMessage.toLowerCase().includes('unsupported color function') || primaryMessage.toLowerCase().includes('oklch')) {
+        try {
+          exportAsSimplePdf(pdfName);
+          return;
+        } catch (simplePdfError) {
+          console.error('Simple PDF export failed:', simplePdfError);
+        }
+      }
 
       try {
         const canvas = await html2canvas(el, {
@@ -174,8 +345,13 @@ export default function ResumeBuilder() {
         pdf.save(`${pdfName}.pdf`);
       } catch (fallbackError) {
         console.error('Fallback PDF export failed:', fallbackError);
-        const fallbackMessage = fallbackError instanceof Error ? fallbackError.message : 'Unknown error';
-        setExportError(`PDF export failed. ${fallbackMessage}`);
+        try {
+          exportAsSimplePdf(pdfName);
+        } catch (simplePdfError) {
+          console.error('Simple PDF export failed:', simplePdfError);
+          const fallbackMessage = fallbackError instanceof Error ? fallbackError.message : 'Unknown error';
+          setExportError(`PDF export failed. ${fallbackMessage}`);
+        }
       }
     } finally {
       setIsExporting(false);
