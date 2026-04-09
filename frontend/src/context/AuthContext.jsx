@@ -1,10 +1,26 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const AuthContext = createContext();
-const API_BASE = import.meta.env.VITE_API_URL || '';
+const API_BASE = (import.meta.env.VITE_API_URL || '').trim();
+const FALLBACK_API_BASE = 'https://ai-job-portal-98k6.onrender.com';
+
+const getApiBase = () => (API_BASE || FALLBACK_API_BASE).replace(/\/$/, '');
+
+const parseJsonResponse = async (res) => {
+  const raw = await res.text();
+  if (!raw) {
+    return { ok: false, data: null, message: 'Empty response from server' };
+  }
+
+  try {
+    return { ok: true, data: JSON.parse(raw), message: '' };
+  } catch (error) {
+    return { ok: false, data: null, message: 'Server returned invalid JSON response' };
+  }
+};
 
 const requireApiBase = () => {
-  return API_BASE;
+  return getApiBase();
 };
 
 export const AuthProvider = ({ children }) => {
@@ -32,8 +48,14 @@ export const AuthProvider = ({ children }) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       });
-      const data = await res.json();
-      if (data.success) {
+      const parsed = await parseJsonResponse(res);
+
+      if (!parsed.ok) {
+        return { success: false, message: parsed.message };
+      }
+
+      const data = parsed.data;
+      if (res.ok && data.success) {
         const user = {
           id: data.user.id || 'u1',
           name: data.user.name,
@@ -56,7 +78,8 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem('ai_jobs_user', JSON.stringify(user));
         return { success: true, user };
       }
-      return { success: false, message: data.message || 'Login failed' };
+
+      return { success: false, message: data?.message || `Login failed (${res.status})` };
     } catch (error) {
       return { success: false, message: error.message };
     }
@@ -69,8 +92,14 @@ export const AuthProvider = ({ children }) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token: googleToken, role }),
       });
-      const data = await res.json();
-      if (data.success) {
+      const parsed = await parseJsonResponse(res);
+
+      if (!parsed.ok) {
+        return { success: false, message: parsed.message };
+      }
+
+      const data = parsed.data;
+      if (res.ok && data.success) {
         const user = {
           id: data.user.id,
           name: data.user.name,
@@ -93,7 +122,8 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem('ai_jobs_user', JSON.stringify(user));
         return { success: true, user };
       }
-      return { success: false, message: data.message || 'Google login failed' };
+
+      return { success: false, message: data?.message || `Google login failed (${res.status})` };
     } catch (error) {
       return { success: false, message: error.message };
     }
