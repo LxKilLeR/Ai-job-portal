@@ -2,25 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Edit2, Trash2, Pause, Play, MapPin, DollarSign, Users, ChevronDown, ChevronUp, X, RefreshCw } from 'lucide-react';
 
-const API_BASE = (import.meta.env.VITE_API_URL || 'https://ai-job-portal-backend-1.onrender.com').replace(/\/$/, '');
-
-const parseJsonSafe = async (response) => {
-  const text = await response.text();
-  try {
-    return JSON.parse(text);
-  } catch (error) {
-    return { success: false, message: 'Server returned an invalid response.' };
-  }
-};
+const API_BASE = import.meta.env.VITE_API_URL || '';
 
 function getAuthHeaders() {
-  let token = null;
-  try {
-    const userStr = localStorage.getItem('ai_jobs_user');
-    token = userStr ? JSON.parse(userStr).token : null;
-  } catch (error) {
-    token = localStorage.getItem('token');
-  }
+  const userStr = localStorage.getItem('ai_jobs_user');
+  const token = userStr ? JSON.parse(userStr).token : null;
   return {
     'Content-Type': 'application/json',
     ...(token && { 'Authorization': `Bearer ${token}` })
@@ -61,7 +47,7 @@ export default function ManageJobs() {
       const res = await fetch(`${API_BASE}/api/recruiter/jobs?limit=100`, { headers });
       console.log('🔍 Jobs API response status:', res.status, res.statusText);
 
-      const data = await parseJsonSafe(res);
+      const data = await res.json();
       console.log('🔍 Jobs API response data:', data);
 
       if (data.success) {
@@ -97,7 +83,7 @@ export default function ManageJobs() {
         method: 'PATCH',
         headers: getAuthHeaders()
       });
-      const data = await parseJsonSafe(res);
+      const data = await res.json();
       if (data.success) {
         setJobs(prev => prev.map(j =>
           j._id === id ? { ...j, status: j.status === 'Active' ? 'Paused' : 'Active' } : j
@@ -114,7 +100,7 @@ export default function ManageJobs() {
         method: 'DELETE',
         headers: getAuthHeaders()
       });
-      const data = await parseJsonSafe(res);
+      const data = await res.json();
       if (data.success) {
         setJobs(prev => prev.filter(j => j._id !== id));
         setDeleteConfirm(null);
@@ -137,7 +123,7 @@ export default function ManageJobs() {
           description: editJob.description,
         })
       });
-      const data = await parseJsonSafe(res);
+      const data = await res.json();
       if (data.success) {
         setJobs(prev => prev.map(j =>
           j._id === editJob._id

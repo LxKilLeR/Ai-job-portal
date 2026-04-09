@@ -1,18 +1,13 @@
 import axios from 'axios';
 
-const API_BASE = (import.meta.env.VITE_API_URL || 'https://ai-job-portal-backend-1.onrender.com').replace(/\/$/, '');
+const API_BASE = import.meta.env.VITE_API_URL || '';
 const API_URL = `${API_BASE}/api/chat`;
 
 export const sendMessageToAssistant = async (conversationHistory) => {
   try {
     // Get token from localStorage (ai_jobs_user object)
-    let token = null;
-    try {
-      const userStr = localStorage.getItem('ai_jobs_user');
-      token = userStr ? JSON.parse(userStr).token : null;
-    } catch (error) {
-      token = localStorage.getItem('token');
-    }
+    const userStr = localStorage.getItem('ai_jobs_user');
+    const token = userStr ? JSON.parse(userStr).token : null;
 
     const headers = {
       'Content-Type': 'application/json'

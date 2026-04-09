@@ -3,17 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Bell, Briefcase, LogOut } from 'lucide-react';
 
-const API_BASE = (import.meta.env.VITE_API_URL || 'https://ai-job-portal-backend-1.onrender.com').replace(/\/$/, '');
-
-const parseJsonResponse = async (res) => {
-  const raw = await res.text();
-  if (!raw) return null;
-  try {
-    return JSON.parse(raw);
-  } catch (error) {
-    return null;
-  }
-};
+const API_BASE = import.meta.env.VITE_API_URL || '';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
@@ -36,13 +26,7 @@ export default function Navbar() {
           Authorization: `Bearer ${authToken}`
         }
       });
-
-      const data = await parseJsonResponse(res);
-      if (!data) {
-        console.error('Notifications API returned non-JSON response');
-        return;
-      }
-
+      const data = await res.json();
       if (res.ok && data.success) {
         setNotifications(data.data || []);
         setUnreadCount(data?.meta?.unreadCount || 0);

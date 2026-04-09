@@ -4,7 +4,7 @@ import axios from 'axios';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Building, MapPin, DollarSign, Calendar, Send } from 'lucide-react';
 
-const API_BASE = (import.meta.env.VITE_API_URL || 'https://ai-job-portal-backend-1.onrender.com').replace(/\/$/, '');
+const API_BASE = import.meta.env.VITE_API_URL || '';
 
 export default function JobDetail() {
   const { id } = useParams();

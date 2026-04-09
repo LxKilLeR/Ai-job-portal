@@ -6,17 +6,7 @@ import { jsPDF } from 'jspdf';
 import { Download, LayoutTemplate, FileEdit, Sparkles, Wand2, Eye, Split, Trash2, Plus, FileText } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
-const API_BASE = (import.meta.env.VITE_API_URL || 'https://ai-job-portal-backend-1.onrender.com').replace(/\/$/, '');
-
-const parseJsonResponse = async (res) => {
-  const raw = await res.text();
-  if (!raw) return null;
-  try {
-    return JSON.parse(raw);
-  } catch (error) {
-    return null;
-  }
-};
+const API_BASE = import.meta.env.VITE_API_URL || '';
 
 export default function ResumeBuilder() {
   const { user } = useAuth();
@@ -77,11 +67,7 @@ export default function ResumeBuilder() {
         });
 
         if (profileRes.ok) {
-          const profileData = await parseJsonResponse(profileRes);
-          if (!profileData) {
-            console.error('Profile API returned non-JSON response');
-            return;
-          }
+          const profileData = await profileRes.json();
           const profile = profileData?.data || {};
 
           setData((prev) => ({
@@ -99,11 +85,7 @@ export default function ResumeBuilder() {
         if (userId) {
           const resumeRes = await fetch(`${API_BASE}/api/resume/user/${userId}`);
           if (resumeRes.ok) {
-            const resumeData = await parseJsonResponse(resumeRes);
-            if (!resumeData) {
-              console.error('Resume API returned non-JSON response');
-              return;
-            }
+            const resumeData = await resumeRes.json();
             const resume = resumeData?.data;
             if (resume) {
               setData((prev) => ({

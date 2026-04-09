@@ -2,17 +2,8 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Plus, X, Loader2, CheckCircle2, Briefcase } from 'lucide-react';
 
-const API_BASE = (import.meta.env.VITE_API_URL || 'https://ai-job-portal-backend-1.onrender.com').replace(/\/$/, '');
+const API_BASE = import.meta.env.VITE_API_URL || '';
 const SKILL_SUGGESTIONS = ['React', 'TypeScript', 'Node.js', 'Python', 'AWS', 'Docker', 'Figma', 'SQL', 'GraphQL', 'Go', 'Kubernetes', 'MongoDB'];
-
-const parseJsonSafe = async (response) => {
-  const text = await response.text();
-  try {
-    return JSON.parse(text);
-  } catch (error) {
-    return { success: false, message: 'Server returned an invalid response.' };
-  }
-};
 
 export default function PostJob() {
   const [form, setForm] = useState({
@@ -87,7 +78,7 @@ export default function PostJob() {
         })
       });
 
-      const data = await parseJsonSafe(response);
+      const data = await response.json();
       if (!response.ok) throw new Error(data.message || 'Failed to post job');
 
       setLoading(false);

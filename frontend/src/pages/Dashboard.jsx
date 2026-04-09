@@ -4,26 +4,11 @@ import { FileText, Bookmark, Eye, Target, Plus, Briefcase, Zap, Sparkles, Trendi
 import { motion as Motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 
-const API_BASE = (import.meta.env.VITE_API_URL || 'https://ai-job-portal-backend-1.onrender.com').replace(/\/$/, '');
-
-const parseJsonResponse = async (res) => {
-  const raw = await res.text();
-  if (!raw) return null;
-  try {
-    return JSON.parse(raw);
-  } catch (error) {
-    return null;
-  }
-};
+const API_BASE = import.meta.env.VITE_API_URL || '';
 
 const getAuthHeaders = () => {
-  let token = null;
-  try {
-    const userStr = localStorage.getItem('ai_jobs_user');
-    token = userStr ? JSON.parse(userStr).token : null;
-  } catch (error) {
-    token = localStorage.getItem('token');
-  }
+  const userStr = localStorage.getItem('ai_jobs_user');
+  const token = userStr ? JSON.parse(userStr).token : null;
   return {
     'Content-Type': 'application/json',
     ...(token && { Authorization: `Bearer ${token}` })
@@ -48,13 +33,8 @@ export default function Dashboard() {
           headers: getAuthHeaders()
         });
 
-        const data = await parseJsonResponse(res);
-        if (!data) {
-          console.error('Seeker overview API returned non-JSON response');
-          return;
-        }
-
-        if (res.ok && data.success) {
+        const data = await res.json();
+        if (data.success) {
           setOverviewStats({
             applicationsCount: data.data?.applicationsCount || 0,
             savedJobsCount: data.data?.savedJobsCount || 0,
@@ -81,15 +61,9 @@ export default function Dashboard() {
 
         const query = userId ? `?userId=${encodeURIComponent(userId)}` : '';
         const res = await fetch(`${API_BASE}/api/recommendations${query}`);
-        const data = await parseJsonResponse(res);
+        const data = await res.json();
 
-        if (!data) {
-          console.error('Recommendations API returned non-JSON response');
-          setTopRecommendations([]);
-          return;
-        }
-
-        if (res.ok && data.success) {
+        if (data.success) {
           const ranked = Array.isArray(data.data)
             ? [...data.data].sort((a, b) => (b.matchScore || 0) - (a.matchScore || 0)).slice(0, 2)
             : [];
