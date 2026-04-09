@@ -1,17 +1,14 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { GoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../context/AuthContext';
-import { Mail, Lock, LogIn, ArrowRight, ShieldCheck, Zap } from 'lucide-react';
+import { Mail, Lock, ArrowRight, ShieldCheck, Zap } from 'lucide-react';
 import { motion as Motion } from 'framer-motion';
-
-const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const { login, loginWithGoogle } = useAuth();
+  const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -25,22 +22,6 @@ export default function Login() {
       const needsSetup = role === 'Seeker' && !res.user?.profileCompleted;
       navigate(isRecruiter ? '/recruiter' : needsSetup ? '/profile-setup' : '/dashboard');
     } else setError(res.message);
-  };
-
-  const handleGoogleSuccess = async (credentialResponse) => {
-    const res = await loginWithGoogle(credentialResponse.credential);
-    if (res.success) {
-      const role = res.user?.role;
-      const isRecruiter = ['Employer', 'Recruiter'].includes(role);
-      const needsSetup = role === 'Seeker' && !res.user?.profileCompleted;
-      navigate(isRecruiter ? '/recruiter' : needsSetup ? '/profile-setup' : '/dashboard');
-    } else {
-      setError(res.message);
-    }
-  };
-
-  const handleGoogleError = () => {
-    setError('Google sign-in failed. Please try again.');
   };
 
   return (
@@ -118,34 +99,6 @@ export default function Login() {
             Initiate Link <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
           </button>
         </form>
-
-        <div className="relative my-8">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-white/10"></div>
-          </div>
-          <div className="relative flex justify-center text-sm">
-            <span className="px-4 bg-[var(--glass-bg)] text-gray-500">Or connect via</span>
-          </div>
-        </div>
-
-        {GOOGLE_CLIENT_ID ? (
-          <div className="flex justify-center mb-2">
-            <GoogleLogin
-              onSuccess={handleGoogleSuccess}
-              onError={handleGoogleError}
-              theme="filled_blue"
-              size="large"
-              text="signin_with"
-              shape="rectangular"
-              useOneTap
-              width="280"
-            />
-          </div>
-        ) : (
-          <div className="mb-2 rounded-xl border border-amber-400/20 bg-amber-400/10 px-4 py-3 text-center text-xs font-semibold text-amber-200">
-            Google sign-in is not configured for this deployment.
-          </div>
-        )}
 
         <div className="mt-6 pt-8 border-t border-white/5 flex flex-col items-center gap-6">
           <p className="text-center text-gray-400 text-sm font-medium">

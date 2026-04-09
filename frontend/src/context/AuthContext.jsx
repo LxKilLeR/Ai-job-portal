@@ -85,50 +85,6 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const loginWithGoogle = async (googleToken, role) => {
-    try {
-      const res = await fetch(`${requireApiBase()}/api/auth/google`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token: googleToken, role }),
-      });
-      const parsed = await parseJsonResponse(res);
-
-      if (!parsed.ok) {
-        return { success: false, message: parsed.message };
-      }
-
-      const data = parsed.data;
-      if (res.ok && data.success) {
-        const user = {
-          id: data.user.id,
-          name: data.user.name,
-          email: data.user.email,
-          role: data.user.role,
-          company: data.user.company,
-          location: data.user.location,
-          phone: data.user.phone,
-          bio: data.user.bio,
-          avatar: data.user.avatar,
-          searchingFor: data.user.searchingFor,
-          profession: data.user.profession,
-          skills: data.user.skills,
-          address: data.user.address,
-          profileCompleted: data.user.profileCompleted,
-          token: data.token,
-        };
-        setUser(user);
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('ai_jobs_user', JSON.stringify(user));
-        return { success: true, user };
-      }
-
-      return { success: false, message: data?.message || `Google login failed (${res.status})` };
-    } catch (error) {
-      return { success: false, message: error.message };
-    }
-  };
-
   const signup = async (data) => {
     const mockUser = {
       id: 'u2',
@@ -184,7 +140,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, loginWithGoogle, signup, logout, setAuth, updateUser }}>
+    <AuthContext.Provider value={{ user, loading, login, signup, logout, setAuth, updateUser }}>
       {!loading && children}
     </AuthContext.Provider>
   );

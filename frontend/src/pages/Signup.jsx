@@ -3,9 +3,6 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Mail, Lock, User, UserPlus, Shield, ArrowRight, CheckCircle } from 'lucide-react';
 import { requestOTP, verifyOTP } from '../services/otpService';
-import { GoogleLogin } from '@react-oauth/google';
-
-const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
 
 export default function Signup() {
   const [searchParams] = useSearchParams();
@@ -23,7 +20,7 @@ export default function Signup() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [devOtp, setDevOtp] = useState('');
-  const { setAuth, loginWithGoogle } = useAuth();
+  const { setAuth } = useAuth();
   const navigate = useNavigate();
 
   // Set role from URL param on mount
@@ -66,27 +63,6 @@ export default function Signup() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleGoogleSignupSuccess = async (credentialResponse) => {
-    setError('');
-    if (!formData.role) {
-      setError('Please select Job Seeker or Recruiter role first.');
-      return;
-    }
-
-    const res = await loginWithGoogle(credentialResponse.credential, formData.role);
-    if (res.success) {
-      const role = res.user?.role;
-      const needsSetup = role === 'Seeker' && !res.user?.profileCompleted;
-      navigate(role === 'Employer' ? '/recruiter' : needsSetup ? '/profile-setup' : '/dashboard');
-    } else {
-      setError(res.message || 'Google signup failed');
-    }
-  };
-
-  const handleGoogleSignupError = () => {
-    setError('Google sign-in failed. Please try again.');
   };
 
   const handleVerifyOTP = async (e) => {
@@ -287,40 +263,6 @@ export default function Signup() {
               )}
             </button>
 
-            <div className="relative my-4">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-white/10"></div>
-              </div>
-              <div className="relative flex justify-center text-xs">
-                <span className="px-3 bg-[var(--glass-bg)] text-gray-500 uppercase tracking-widest">or</span>
-              </div>
-            </div>
-
-            {!formData.role ? (
-              <button
-                type="button"
-                disabled
-                className="w-full py-3 rounded-xl border border-white/10 text-gray-500 bg-white/5 cursor-not-allowed"
-              >
-                Select role to continue with Google
-              </button>
-            ) : !GOOGLE_CLIENT_ID ? (
-              <div className="rounded-xl border border-amber-400/20 bg-amber-400/10 px-4 py-3 text-center text-xs font-semibold text-amber-200">
-                Google sign-up is not configured for this deployment.
-              </div>
-            ) : (
-              <div className="flex justify-center">
-                <GoogleLogin
-                  onSuccess={handleGoogleSignupSuccess}
-                  onError={handleGoogleSignupError}
-                  text="signup_with"
-                  shape="rectangular"
-                  theme="filled_blue"
-                  size="large"
-                  width="300"
-                />
-              </div>
-            )}
           </form>
         )}
 

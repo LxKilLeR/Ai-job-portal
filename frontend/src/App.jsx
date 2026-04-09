@@ -1,6 +1,5 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { GoogleOAuthProvider } from '@react-oauth/google';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Layout from './components/Layout';
 import Home from './pages/Home';
@@ -112,25 +111,13 @@ function AppContent() {
   );
 }
 
-const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
-
 function App() {
-  const appShell = (
+  return (
     <AuthProvider>
       <BrowserRouter>
         <AppContent />
       </BrowserRouter>
     </AuthProvider>
-  );
-
-  if (!GOOGLE_CLIENT_ID) {
-    return appShell;
-  }
-
-  return (
-    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-      {appShell}
-    </GoogleOAuthProvider>
   );
 }
 
