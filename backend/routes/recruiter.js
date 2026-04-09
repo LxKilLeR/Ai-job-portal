@@ -30,6 +30,12 @@ router.get('/overview', async (req, res, next) => {
 
     const totalApplicants = applications.length;
     const pendingApplications = applications.filter(app => app.status === 'pending').length;
+    const shortlistedApplications = applications.filter(app => app.status === 'shortlisted').length;
+    const acceptedApplications = applications.filter(app => app.status === 'accepted').length;
+    const activeCandidates = pendingApplications + shortlistedApplications;
+    const placementRate = totalApplicants > 0
+      ? Math.round((acceptedApplications / totalApplicants) * 100)
+      : 0;
 
     // Calculate match statistics
     const avgMatchScore = applications.length > 0
@@ -43,6 +49,9 @@ router.get('/overview', async (req, res, next) => {
         activeJobs,
         totalViews,
         totalApplicants,
+        activeCandidates,
+        acceptedApplications,
+        placementRate,
         pendingApplications,
         avgMatchScore,
         recentApplications: applications.slice(0, 5).map(app => ({

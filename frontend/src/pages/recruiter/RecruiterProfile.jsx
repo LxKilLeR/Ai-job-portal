@@ -34,6 +34,11 @@ export default function RecruiterProfile() {
   const [isLoading, setIsLoading] = useState(true);
   const [latestJobs, setLatestJobs] = useState([]);
   const [jobsLoading, setJobsLoading] = useState(true);
+  const [overviewStats, setOverviewStats] = useState({
+    totalJobs: 0,
+    activeCandidates: 0,
+    placementRate: 0
+  });
 
   const formatPostedAgo = (dateValue) => {
     if (!dateValue) return 'Posted recently';
@@ -146,6 +151,32 @@ export default function RecruiterProfile() {
     fetchLatestJobs();
   }, []);
 
+  useEffect(() => {
+    const fetchOverviewStats = async () => {
+      try {
+        const token = getStoredToken();
+        const res = await fetch(`${API_BASE}/api/recruiter/overview`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          setOverviewStats({
+            totalJobs: data.data?.totalJobs || 0,
+            activeCandidates: data.data?.activeCandidates || 0,
+            placementRate: data.data?.placementRate || 0
+          });
+        }
+      } catch (error) {
+        console.error('Failed to fetch recruiter overview:', error);
+      }
+    };
+
+    fetchOverviewStats();
+  }, []);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
@@ -209,9 +240,9 @@ export default function RecruiterProfile() {
   };
 
   const profileStats = [
-    { label: 'Jobs Posted', value: '14', icon: Briefcase, color: 'text-blue-400' },
-    { label: 'Active Candidates', value: '86', icon: User, color: 'text-indigo-400' },
-    { label: 'Placement Rate', value: '92%', icon: Shield, color: 'text-green-400' }
+    { label: 'Jobs Posted', value: overviewStats.totalJobs, icon: Briefcase, color: 'text-blue-400' },
+    { label: 'Active Candidates', value: overviewStats.activeCandidates, icon: User, color: 'text-indigo-400' },
+    { label: 'Placement Rate', value: `${overviewStats.placementRate}%`, icon: Shield, color: 'text-green-400' }
   ];
 
   if (isLoading) {
