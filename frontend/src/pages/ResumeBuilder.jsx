@@ -377,15 +377,21 @@ export default function ResumeBuilder() {
                          </div>
                        </section>
 
-                       <section className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2">
-                         <div>
+                       <section className="mt-8 space-y-6">
+                         <div className="min-w-0">
                            <h2 className="text-base font-outfit font-extrabold uppercase border-b-2 border-slate-200 mb-3 tracking-[0.08em] text-indigo-900 break-words leading-tight">Certifications</h2>
                            <pre className="text-sm font-sans whitespace-pre-wrap leading-relaxed text-slate-700">{data.certifications}</pre>
                          </div>
-                         <div>
+                         <div className="min-w-0">
                            <h2 className="text-base font-outfit font-extrabold uppercase border-b-2 border-slate-200 mb-3 tracking-[0.08em] text-indigo-900 break-words leading-tight">Achievements</h2>
                            <pre className="text-sm font-sans whitespace-pre-wrap leading-relaxed text-slate-700">{data.achievements}</pre>
                          </div>
+                         {!!parsedLanguages.length && (
+                           <div className="min-w-0">
+                             <h2 className="text-base font-outfit font-extrabold uppercase border-b-2 border-slate-200 mb-3 tracking-[0.08em] text-indigo-900 break-words leading-tight">Languages</h2>
+                             <p className="text-sm font-sans whitespace-pre-wrap leading-relaxed text-slate-700">{parsedLanguages.join(', ')}</p>
+                           </div>
+                         )}
                        </section>
                     </div>
                   ) : (
@@ -445,16 +451,26 @@ export default function ResumeBuilder() {
                              <p className="text-sm font-bold text-slate-800 whitespace-pre-wrap leading-relaxed">{data.education}</p>
                           </section>
 
-                          {(data.certifications || data.achievements) && (
-                            <section className="mt-12 grid grid-cols-1 gap-8 md:grid-cols-2">
-                              <div>
-                                <h3 className="text-[10px] font-extrabold uppercase tracking-[0.08em] text-indigo-500 mb-4 border-b border-slate-100 pb-2 break-words leading-tight">Certifications</h3>
-                                <pre className="text-xs font-sans whitespace-pre-wrap leading-relaxed text-slate-700">{data.certifications}</pre>
-                              </div>
-                              <div>
-                                <h3 className="text-[10px] font-extrabold uppercase tracking-[0.08em] text-indigo-500 mb-4 border-b border-slate-100 pb-2 break-words leading-tight">Achievements</h3>
-                                <pre className="text-xs font-sans whitespace-pre-wrap leading-relaxed text-slate-700">{data.achievements}</pre>
-                              </div>
+                          {(data.certifications || data.achievements || parsedLanguages.length > 0) && (
+                            <section className="mt-12 space-y-6">
+                              {!!data.certifications && (
+                                <div className="min-w-0">
+                                  <h3 className="text-[10px] font-extrabold uppercase tracking-[0.08em] text-indigo-500 mb-4 border-b border-slate-100 pb-2 break-words leading-tight">Certifications</h3>
+                                  <pre className="text-xs font-sans whitespace-pre-wrap leading-relaxed text-slate-700">{data.certifications}</pre>
+                                </div>
+                              )}
+                              {!!data.achievements && (
+                                <div className="min-w-0">
+                                  <h3 className="text-[10px] font-extrabold uppercase tracking-[0.08em] text-indigo-500 mb-4 border-b border-slate-100 pb-2 break-words leading-tight">Achievements</h3>
+                                  <pre className="text-xs font-sans whitespace-pre-wrap leading-relaxed text-slate-700">{data.achievements}</pre>
+                                </div>
+                              )}
+                              {!!parsedLanguages.length && (
+                                <div className="min-w-0">
+                                  <h3 className="text-[10px] font-extrabold uppercase tracking-[0.08em] text-indigo-500 mb-4 border-b border-slate-100 pb-2 break-words leading-tight">Languages</h3>
+                                  <p className="text-xs font-sans whitespace-pre-wrap leading-relaxed text-slate-700">{parsedLanguages.join(', ')}</p>
+                                </div>
+                              )}
                             </section>
                           )}
 
