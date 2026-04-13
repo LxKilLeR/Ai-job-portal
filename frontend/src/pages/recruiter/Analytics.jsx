@@ -5,8 +5,9 @@ import {
   CartesianGrid, PieChart, Pie, Cell, Legend
 } from 'recharts';
 import { RefreshCw, Loader2 } from 'lucide-react';
+import { getApiBase } from '../../utils/apiHelpers';
 
-const API_BASE = import.meta.env.VITE_API_URL || '';
+const API_BASE = getApiBase();
 
 function getAuthHeaders() {
   const userStr = localStorage.getItem('ai_jobs_user');

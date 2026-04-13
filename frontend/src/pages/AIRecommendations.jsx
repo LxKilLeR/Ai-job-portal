@@ -4,8 +4,9 @@ import { motion as Motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, ChevronUp, Sparkles, Brain } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { getApiBase } from '../utils/apiHelpers';
 
-const API_BASE = import.meta.env.VITE_API_URL || '';
+const API_BASE = getApiBase();
 
 export default function AIRecommendations() {
   const { user } = useAuth();

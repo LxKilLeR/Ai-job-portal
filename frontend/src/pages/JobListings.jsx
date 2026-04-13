@@ -3,8 +3,9 @@ import { motion as Motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { Search, MapPin, DollarSign, Filter, Sparkles, Clock, Globe } from 'lucide-react';
+import { getApiBase } from '../utils/apiHelpers';
 
-const API_BASE = import.meta.env.VITE_API_URL || '';
+const API_BASE = getApiBase();
 
 export default function JobListings() {
   const [jobs, setJobs] = useState([]);

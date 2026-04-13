@@ -3,8 +3,9 @@ import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Building, MapPin, DollarSign, Calendar, Send } from 'lucide-react';
+import { getApiBase } from '../utils/apiHelpers';
 
-const API_BASE = import.meta.env.VITE_API_URL || '';
+const API_BASE = getApiBase();
 
 export default function JobDetail() {
   const { id } = useParams();

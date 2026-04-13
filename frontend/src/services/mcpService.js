@@ -1,6 +1,7 @@
 import axios from 'axios';
+import { getApiBase } from '../utils/apiHelpers';
 
-const API_BASE = import.meta.env.VITE_API_URL || '';
+const API_BASE = getApiBase();
 const API_URL = `${API_BASE}/api/chat`;
 
 export const sendMessageToAssistant = async (conversationHistory) => {

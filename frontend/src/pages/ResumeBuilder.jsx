@@ -5,8 +5,9 @@ import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 import { Download, LayoutTemplate, FileEdit, Sparkles, Wand2, Eye, Split, Trash2, Plus, FileText } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { getApiBase } from '../utils/apiHelpers';
 
-const API_BASE = import.meta.env.VITE_API_URL || '';
+const API_BASE = getApiBase();
 
 export default function ResumeBuilder() {
   const { user } = useAuth();
